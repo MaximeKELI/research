@@ -132,8 +132,10 @@ async def upload_cv(
         if old_file.exists():
             old_file.unlink()
     
-    profil.cv_url = str(file_path)
+    # Stocker le chemin relatif pour l'URL
+    relative_path = f"cv/{unique_filename}"
+    profil.cv_url = relative_path
     db.commit()
     
-    return {"message": "CV uploadé avec succès", "cv_url": str(file_path)}
+    return {"message": "CV uploadé avec succès", "cv_url": f"/uploads/{relative_path}"}
 
