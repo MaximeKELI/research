@@ -8,10 +8,11 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      final formData = {
+      // Utiliser FormData pour form-urlencoded
+      final formData = FormData.fromMap({
         'username': email, // OAuth2PasswordRequestForm utilise 'username'
         'password': password,
-      };
+      });
       
       final response = await _apiClient.dio.post(
         '/auth/login',
@@ -21,23 +22,62 @@ class AuthService {
         ),
       );
       
-      final token = response.data['access_token'];
-      await _apiClient.setToken(token);
-      
-      // Récupérer les infos utilisateur
-      final userResponse = await _apiClient.dio.get('/auth/me');
-      final user = User.fromJson(userResponse.data);
-      
-      // Sauvegarder les infos utilisateur
-      final prefs = await SharedPreferences.getInstance();
-      await prefs.setString('user_email', user.email);
-      await prefs.setString('user_role', user.role);
-      await prefs.setInt('user_id', user.id);
+      if (response.statusCode == 200 && response.data != null) {
+        final token = response.data['access_token'];
+        if (token == null) {
+          return {
+            'success': false,
+            'error': 'Token non reçu du serveur',
+          };
+        }
+        
+        await _apiClient.setToken(token);
+        
+        // Récupérer les infos utilisateur
+        try {
+          final userResponse = await _apiClient.dio.get('/auth/me');
+          final user = User.fromJson(userResponse.data);
+          
+          // Sauvegarder les infos utilisateur
+          final prefs = await SharedPreferences.getInstance();
+          await prefs.setString('user_email', user.email);
+          await prefs.setString('user_role', user.role);
+          await prefs.setInt('user_id', user.id);
+          
+          return {
+            'success': true,
+            'user': user,
+            'token': token,
+          };
+        } catch (e) {
+          // Si la récupération de l'utilisateur échoue, on retourne quand même le succès
+          return {
+            'success': true,
+            'user': null,
+            'token': token,
+          };
+        }
+      } else {
+        return {
+          'success': false,
+          'error': 'Réponse invalide du serveur',
+        };
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Erreur de connexion';
+      if (e.response != null) {
+        errorMessage = e.response?.data['detail'] ?? 
+                      e.response?.data['message'] ?? 
+                      'Erreur ${e.response?.statusCode}';
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Timeout de connexion. Vérifiez que le serveur est démarré.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'Impossible de se connecter au serveur. Vérifiez l\'URL de l\'API.';
+      }
       
       return {
-        'success': true,
-        'user': user,
-        'token': token,
+        'success': false,
+        'error': errorMessage,
       };
     } catch (e) {
       return {

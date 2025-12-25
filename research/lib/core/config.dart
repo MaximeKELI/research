@@ -1,7 +1,7 @@
 class ApiConfig {
   // Modifier cette URL selon votre configuration
-  static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator
-  // static const String baseUrl = 'http://localhost:8000'; // iOS simulator
+  // static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator
+  static const String baseUrl = 'http://localhost:8000'; // Linux/Desktop/iOS simulator
   // static const String baseUrl = 'http://192.168.1.X:8000'; // Device physique
   
   static const String apiPrefix = '/api';
