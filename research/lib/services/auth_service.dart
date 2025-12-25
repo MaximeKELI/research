@@ -102,9 +102,42 @@ class AuthService {
         },
       );
       
+      if (response.statusCode == 201 && response.data != null) {
+        return {
+          'success': true,
+          'user': User.fromJson(response.data),
+        };
+      } else {
+        return {
+          'success': false,
+          'error': 'Réponse invalide du serveur',
+        };
+      }
+    } on DioException catch (e) {
+      String errorMessage = 'Erreur d\'inscription';
+      if (e.response != null) {
+        errorMessage = e.response?.data['detail'] ?? 
+                      e.response?.data['message'] ?? 
+                      'Erreur ${e.response?.statusCode}';
+        
+        // Gérer les erreurs spécifiques
+        if (e.response?.statusCode == 400) {
+          final detail = e.response?.data['detail'];
+          if (detail is String) {
+            errorMessage = detail;
+          } else if (detail is List && detail.isNotEmpty) {
+            errorMessage = detail[0]['msg'] ?? detail.toString();
+          }
+        }
+      } else if (e.type == DioExceptionType.connectionTimeout) {
+        errorMessage = 'Timeout de connexion. Vérifiez que le serveur est démarré.';
+      } else if (e.type == DioExceptionType.connectionError) {
+        errorMessage = 'Impossible de se connecter au serveur. Vérifiez l\'URL de l\'API.';
+      }
+      
       return {
-        'success': true,
-        'user': User.fromJson(response.data),
+        'success': false,
+        'error': errorMessage,
       };
     } catch (e) {
       return {
