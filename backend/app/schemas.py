@@ -80,6 +80,17 @@ class EntrepriseBase(BaseModel):
     secteur: Optional[str] = None
     description: Optional[str] = None
     contact: Optional[str] = None
+    telephone: Optional[str] = None
+    email_contact: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
+    pays: Optional[str] = None
+    code_postal: Optional[str] = None
+    site_web: Optional[str] = None
+    taille_entreprise: Optional[str] = None
+    nombre_employes: Optional[int] = None
+    annee_creation: Optional[int] = None
+    type_entreprise: Optional[str] = None
 
 class EntrepriseCreate(EntrepriseBase):
     pass
@@ -89,6 +100,17 @@ class EntrepriseUpdate(BaseModel):
     secteur: Optional[str] = None
     description: Optional[str] = None
     contact: Optional[str] = None
+    telephone: Optional[str] = None
+    email_contact: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
+    pays: Optional[str] = None
+    code_postal: Optional[str] = None
+    site_web: Optional[str] = None
+    taille_entreprise: Optional[str] = None
+    nombre_employes: Optional[int] = None
+    annee_creation: Optional[int] = None
+    type_entreprise: Optional[str] = None
 
 class EntrepriseResponse(EntrepriseBase):
     id: int
