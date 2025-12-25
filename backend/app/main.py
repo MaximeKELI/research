@@ -1,9 +1,27 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.database import engine, Base
 from app.routers import auth, candidats, entreprises, offres, candidatures, admin
+from app.security.middleware import (
+    SecurityHeadersMiddleware,
+    RateLimitMiddleware,
+    InputSanitizationMiddleware,
+    BruteForceProtectionMiddleware,
+    RequestLoggingMiddleware
+)
 import os
+import logging
+
+# Configuration du logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=[
+        logging.FileHandler('security.log'),
+        logging.StreamHandler()
+    ]
+)
 
 # Créer les tables
 Base.metadata.create_all(bind=engine)
@@ -14,13 +32,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# CORS pour permettre les requêtes depuis Flutter
+# Middlewares de sécurité (ordre important!)
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestLoggingMiddleware)
+app.add_middleware(InputSanitizationMiddleware)
+app.add_middleware(BruteForceProtectionMiddleware)
+app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
+
+# CORS avec restrictions de sécurité
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # En production, spécifier les domaines autorisés
+    allow_origins=os.getenv("ALLOWED_ORIGINS", "http://localhost:3000,http://localhost:8080").split(","),
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_methods=["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
+    expose_headers=["X-CSRF-Token"],
+    max_age=3600,
 )
 
 # Inclure les routeurs

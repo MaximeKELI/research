@@ -5,9 +5,13 @@ from app import auth
 from app.models import User, ProfilCandidat
 from app.schemas import ProfilCandidatCreate, ProfilCandidatUpdate, ProfilCandidatResponse
 from app.auth import require_role
+from app.security.validation import sanitize_string, validate_file_upload
 import os
 import uuid
 from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
 
@@ -34,9 +38,18 @@ async def create_profil(
             detail="Profil déjà créé"
         )
     
+    # Sanitizer les données
+    sanitized_data = profil_data.model_dump()
+    sanitized_data["nom"] = sanitize_string(sanitized_data.get("nom", ""), max_length=100)
+    sanitized_data["prenom"] = sanitize_string(sanitized_data.get("prenom", ""), max_length=100)
+    if sanitized_data.get("niveau_etude"):
+        sanitized_data["niveau_etude"] = sanitize_string(sanitized_data["niveau_etude"], max_length=100)
+    if sanitized_data.get("competences"):
+        sanitized_data["competences"] = sanitize_string(sanitized_data["competences"], max_length=1000)
+    
     db_profil = ProfilCandidat(
         user_id=current_user.id,
-        **profil_data.model_dump()
+        **sanitized_data
     )
     db.add(db_profil)
     db.commit()
@@ -101,21 +114,33 @@ async def upload_cv(
             detail="Accès réservé aux candidats"
         )
     
-    # Vérifier que c'est un PDF
-    if not file.filename.endswith('.pdf'):
+    # Lire le contenu du fichier
+    content = await file.read()
+    
+    # Validation sécurisée du fichier
+    is_valid, error_msg = validate_file_upload(file.filename, content)
+    if not is_valid:
+        logger.warning(f"Invalid file upload attempt: {error_msg}")
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Seuls les fichiers PDF sont acceptés"
+            detail=error_msg
         )
     
-    # Générer un nom unique
-    file_extension = Path(file.filename).suffix
+    # Sanitizer le nom de fichier
+    safe_filename = sanitize_string(file.filename, max_length=255)
+    if not safe_filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename"
+        )
+    
+    # Générer un nom unique sécurisé
+    file_extension = Path(safe_filename).suffix
     unique_filename = f"{uuid.uuid4()}{file_extension}"
     file_path = UPLOAD_DIR / unique_filename
     
     # Sauvegarder le fichier
     with open(file_path, "wb") as buffer:
-        content = await file.read()
         buffer.write(content)
     
     # Mettre à jour le profil

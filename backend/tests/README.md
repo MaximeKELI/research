@@ -110,3 +110,4 @@ Le coverage est configuré pour afficher:
 Objectif: >80% de couverture de code.
 
 
+

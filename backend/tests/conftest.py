@@ -120,3 +120,4 @@ def auth_token_admin(client, test_user_admin):
     return response.json()["access_token"]
 
 
+

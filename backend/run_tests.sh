@@ -17,3 +17,4 @@ echo "✅ Tests terminés !"
 echo "📊 Rapport de couverture généré dans htmlcov/index.html"
 
 
+

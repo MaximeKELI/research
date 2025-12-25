@@ -233,3 +233,4 @@ static const String baseUrl = 'http://10.0.2.2:8000'; // Android emulator
 **Projet créé avec soin pour répondre à tous les besoins exprimés. Prêt pour le développement et le déploiement !** 🚀
 
 
+

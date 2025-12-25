@@ -70,3 +70,4 @@ class MockAuthService extends Mock implements AuthService {}
 - Les tests asynchrones utilisent `await tester.pumpAndSettle()`
 
 
+
