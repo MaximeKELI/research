@@ -118,13 +118,33 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
     
     def detect_attack(self, value: str) -> tuple[bool, str]:
         """Détecter les tentatives d'attaque"""
-        if isinstance(value, str):
-            if self.sql_pattern.search(value):
-                return True, "SQL_INJECTION"
-            if self.xss_pattern.search(value):
-                return True, "XSS"
-            if self.cmd_pattern.search(value):
-                return True, "COMMAND_INJECTION"
+        if not isinstance(value, str):
+            return False, ""
+        
+        # Ignorer les patterns sûrs (formulaires normaux)
+        for safe_pattern in self.SAFE_PATTERNS:
+            if re.search(safe_pattern, value, re.IGNORECASE):
+                # C'est un formulaire normal, vérifier seulement les patterns vraiment dangereux
+                # mais pas les caractères @ qui sont normaux dans les emails
+                dangerous_sql = re.search(r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b|--|#|/\*|\*/)", value, re.IGNORECASE)
+                if dangerous_sql:
+                    return True, "SQL_INJECTION"
+                dangerous_xss = re.search(r"<script[^>]*>|javascript:|on\w+\s*=", value, re.IGNORECASE)
+                if dangerous_xss:
+                    return True, "XSS"
+                # Pour les commandes, ignorer @ et & qui sont normaux dans les formulaires
+                dangerous_cmd = re.search(r"[;|`$(){}]|\b(cat|ls|pwd|whoami|id|uname|ps|netstat)\b", value, re.IGNORECASE)
+                if dangerous_cmd:
+                    return True, "COMMAND_INJECTION"
+                return False, ""
+        
+        # Pour les autres cas, vérifier tous les patterns
+        if self.sql_pattern.search(value):
+            return True, "SQL_INJECTION"
+        if self.xss_pattern.search(value):
+            return True, "XSS"
+        if self.cmd_pattern.search(value):
+            return True, "COMMAND_INJECTION"
         return False, ""
     
     async def dispatch(self, request: Request, call_next):
@@ -141,24 +161,27 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
                     content={"detail": "Invalid input detected"}
                 )
         
-        # Vérifier le body si c'est du JSON
+        # Vérifier le body si c'est du JSON (pas les formulaires)
         if request.method in ["POST", "PUT", "PATCH"]:
-            try:
-                body = await request.body()
-                if body:
-                    body_str = body.decode('utf-8')
-                    is_attack, attack_type = self.detect_attack(body_str)
-                    if is_attack:
-                        logger.critical(
-                            f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
-                            f"in body: {body_str[:200]}"
-                        )
-                        return JSONResponse(
-                            status_code=status.HTTP_400_BAD_REQUEST,
-                            content={"detail": "Invalid input detected"}
-                        )
-            except Exception:
-                pass
+            content_type = request.headers.get("content-type", "")
+            # Ignorer les formulaires (form-urlencoded) qui sont normaux
+            if "application/json" in content_type:
+                try:
+                    body = await request.body()
+                    if body:
+                        body_str = body.decode('utf-8')
+                        is_attack, attack_type = self.detect_attack(body_str)
+                        if is_attack:
+                            logger.critical(
+                                f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
+                                f"in body: {body_str[:200]}"
+                            )
+                            return JSONResponse(
+                                status_code=status.HTTP_400_BAD_REQUEST,
+                                content={"detail": "Invalid input detected"}
+                            )
+                except Exception:
+                    pass
         
         response = await call_next(request)
         return response
