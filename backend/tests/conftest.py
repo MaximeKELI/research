@@ -11,7 +11,7 @@ from app.models import User
 from app.auth import get_password_hash
 
 # Base de données de test en mémoire SQLite
-SQLALCHEMY_DATABASE_URL = "sqlite:///./test.db"
+SQLALCHEMY_DATABASE_URL = "sqlite:///:memory:"
 
 engine = create_engine(
     SQLALCHEMY_DATABASE_URL,
