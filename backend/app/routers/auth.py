@@ -1,5 +1,5 @@
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm import Session
 from app.database import get_db, settings
@@ -7,6 +7,10 @@ from app import auth
 from app.models import User, Role
 from app.schemas import UserCreate, UserResponse, Token, Login
 from app.auth import create_access_token, get_password_hash
+from app.security.validation import sanitize_string, validate_file_upload
+import uuid
+from pathlib import Path
+import logging
 
 router = APIRouter()
 
