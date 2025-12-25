@@ -3,6 +3,7 @@ import 'package:file_picker/file_picker.dart';
 import 'dart:io';
 import '../../services/candidat_service.dart';
 import '../../models/profil_candidat.dart';
+import '../../core/config.dart';
 
 class CandidatProfilScreen extends StatefulWidget {
   const CandidatProfilScreen({super.key});
@@ -100,6 +101,81 @@ class _CandidatProfilScreenState extends State<CandidatProfilScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Profil mis à jour')),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _uploadPhoto() async {
+    // Vérifier si le profil existe, sinon le créer d'abord
+    if (_profil == null) {
+      // Vérifier que les champs obligatoires sont remplis
+      if (_nomController.text.isEmpty || _prenomController.text.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Veuillez remplir au moins le nom et le prénom avant d\'uploader la photo'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+      
+      // Créer le profil d'abord
+      final newProfil = await _service.createProfil(
+        nom: _nomController.text,
+        prenom: _prenomController.text,
+        niveauEtude: _niveauEtudeController.text.isEmpty
+            ? null
+            : _niveauEtudeController.text,
+        competences: _competencesController.text.isEmpty
+            ? null
+            : _competencesController.text,
+      );
+      
+      if (newProfil == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors de la création du profil. Veuillez réessayer.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+      
+      setState(() {
+        _profil = newProfil;
+      });
+    }
+
+    // Sélectionner une image
+    final result = await FilePicker.platform.pickFiles(
+      type: FileType.image,
+    );
+
+    if (result != null && result.files.single.path != null) {
+      final file = File(result.files.single.path!);
+      final success = await _service.uploadPhoto(file);
+
+      if (mounted) {
+        if (success) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Photo uploadée avec succès'),
+              backgroundColor: Colors.green,
+            ),
+          );
+          _loadProfil();
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors de l\'upload de la photo. Vérifiez que le fichier est une image valide (JPG, PNG, max 2MB).'),
+              backgroundColor: Colors.red,
+            ),
           );
         }
       }

@@ -191,5 +191,26 @@ class AuthService {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getString('user_role');
   }
+
+  Future<bool> uploadPhoto(File file) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
+      });
+
+      final response = await _apiClient.dio.post(
+        '/auth/upload-photo',
+        data: formData,
+      );
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 400) {
+        return false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
