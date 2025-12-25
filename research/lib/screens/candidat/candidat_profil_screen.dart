@@ -274,7 +274,22 @@ class _CandidatProfilScreenState extends State<CandidatProfilScreen> {
               onPressed: _uploadCV,
               icon: const Icon(Icons.upload_file),
               label: Text(_profil?.cvUrl != null ? 'Remplacer le CV' : 'Télécharger le CV (PDF)'),
+              style: ElevatedButton.styleFrom(
+                padding: const EdgeInsets.symmetric(vertical: 12),
+              ),
             ),
+            if (_profil == null)
+              Padding(
+                padding: const EdgeInsets.only(top: 8.0),
+                child: Text(
+                  'Note: Le profil sera créé automatiquement si vous uploadez un CV',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.grey[600],
+                    fontStyle: FontStyle.italic,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
             const SizedBox(height: 24),
             if (_isEditing || _profil == null)
               ElevatedButton(
