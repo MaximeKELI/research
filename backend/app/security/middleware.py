@@ -104,6 +104,12 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
         r"\b(cat|ls|pwd|whoami|id|uname|ps|netstat)\b",
     ]
     
+    # Patterns à ignorer (formulaires normaux)
+    SAFE_PATTERNS = [
+        r"username=[^&]*&password=",  # Formulaire de login
+        r"email=[^&]*",  # Email dans les formulaires
+    ]
+    
     def __init__(self, app: ASGIApp):
         super().__init__(app)
         self.sql_pattern = re.compile("|".join(self.SQL_INJECTION_PATTERNS), re.IGNORECASE)
