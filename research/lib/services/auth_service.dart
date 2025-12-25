@@ -8,17 +8,20 @@ class AuthService {
 
   Future<Map<String, dynamic>> login(String email, String password) async {
     try {
-      // Utiliser FormData pour form-urlencoded
-      final formData = FormData.fromMap({
+      // Pour form-urlencoded, utiliser un Map directement
+      final formData = {
         'username': email, // OAuth2PasswordRequestForm utilise 'username'
         'password': password,
-      });
+      };
       
       final response = await _apiClient.dio.post(
         '/auth/login',
         data: formData,
         options: Options(
           contentType: Headers.formUrlEncodedContentType,
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
         ),
       );
       
