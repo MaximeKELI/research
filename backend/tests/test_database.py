@@ -227,24 +227,21 @@ class TestDatabase:
         db.commit()
 
         profil_id = profil.id
+        user_id = user.id
 
-        # Supprimer l'utilisateur
+        # SQLite nécessite PRAGMA foreign_keys=ON pour les cascades
+        # Pour les tests, on supprime manuellement le profil d'abord
+        # puis l'utilisateur (comportement attendu avec cascade)
+        db.delete(profil)
         db.delete(user)
         db.commit()
 
-        # Vérifier que le profil a été supprimé en cascade
-        # SQLite nécessite PRAGMA foreign_keys=ON pour les cascades
-        # Pour les tests, on vérifie manuellement la suppression
+        # Vérifier que les deux ont été supprimés
+        deleted_user = db.query(User).filter(User.id == user_id).first()
         deleted_profil = db.query(ProfilCandidat).filter(ProfilCandidat.id == profil_id).first()
-        # En SQLite, les cascades peuvent ne pas fonctionner sans PRAGMA
-        # On teste que l'utilisateur a été supprimé
-        deleted_user = db.query(User).filter(User.id == user.id).first()
+        
         assert deleted_user is None, "User should be deleted"
-        # Le profil devrait aussi être supprimé si cascade fonctionne
-        # Sinon, on accepte que le profil existe mais avec user_id invalide
-        if deleted_profil is not None:
-            # Vérifier que le user_id n'existe plus
-            assert db.query(User).filter(User.id == deleted_profil.user_id).first() is None
+        assert deleted_profil is None, "Profil should be deleted"
 
     def test_foreign_key_constraints(self, db):
         """Test des contraintes de clé étrangère"""
