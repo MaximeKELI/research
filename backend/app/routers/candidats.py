@@ -38,10 +38,19 @@ async def create_profil(
             detail="Profil déjà créé"
         )
     
-    # Utiliser directement les données (Pydantic valide déjà)
+    # Sanitizer les données avant création
+    nom = sanitize_string(profil_data.nom, max_length=100) if profil_data.nom else None
+    prenom = sanitize_string(profil_data.prenom, max_length=100) if profil_data.prenom else None
+    niveau_etude = sanitize_string(profil_data.niveau_etude, max_length=50) if profil_data.niveau_etude else None
+    competences = sanitize_string(profil_data.competences, max_length=1000) if profil_data.competences else None
+    
+    # Utiliser les données sanitizées
     db_profil = ProfilCandidat(
         user_id=current_user.id,
-        **profil_data.model_dump()
+        nom=nom,
+        prenom=prenom,
+        niveau_etude=niveau_etude,
+        competences=competences
     )
     db.add(db_profil)
     db.commit()
@@ -86,9 +95,15 @@ async def update_profil(
             detail="Profil non trouvé"
         )
     
-    update_data = profil_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(profil, field, value)
+    # Sanitizer et mettre à jour les champs
+    if profil_data.nom is not None:
+        profil.nom = sanitize_string(profil_data.nom, max_length=100)
+    if profil_data.prenom is not None:
+        profil.prenom = sanitize_string(profil_data.prenom, max_length=100)
+    if profil_data.niveau_etude is not None:
+        profil.niveau_etude = sanitize_string(profil_data.niveau_etude, max_length=50)
+    if profil_data.competences is not None:
+        profil.competences = sanitize_string(profil_data.competences, max_length=1000)
     
     db.commit()
     db.refresh(profil)

@@ -186,61 +186,9 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
                     )
         
         # Vérifier le body seulement si c'est du JSON (pas les formulaires form-urlencoded)
-        if request.method in ["POST", "PUT", "PATCH"]:
-            # Ignorer les formulaires (form-urlencoded et multipart) qui sont normaux
-            if "application/json" in content_type:
-                try:
-                    body = await request.body()
-                    if body:
-                        import json
-                        # Parser le JSON pour vérifier seulement les valeurs, pas la structure
-                        try:
-                            body_json = json.loads(body.decode('utf-8'))
-                            # Vérifier récursivement toutes les valeurs string dans le JSON
-                            attack_result = [False, ""]
-                            def check_json_values(obj, path=""):
-                                if isinstance(obj, dict):
-                                    for key, value in obj.items():
-                                        check_json_values(value, f"{path}.{key}" if path else key)
-                                        if attack_result[0]:
-                                            return
-                                elif isinstance(obj, list):
-                                    for i, item in enumerate(obj):
-                                        check_json_values(item, f"{path}[{i}]")
-                                        if attack_result[0]:
-                                            return
-                                elif isinstance(obj, str):
-                                    is_attack, attack_type = self.detect_attack(obj)
-                                    if is_attack:
-                                        logger.critical(
-                                            f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
-                                            f"in body field {path}: {obj[:100]}"
-                                        )
-                                        attack_result[0] = True
-                                        attack_result[1] = attack_type
-                                        return
-                            
-                            check_json_values(body_json)
-                            if attack_result[0]:
-                                return JSONResponse(
-                                    status_code=status.HTTP_400_BAD_REQUEST,
-                                    content={"detail": "Invalid input detected"}
-                                )
-                        except json.JSONDecodeError:
-                            # Si ce n'est pas du JSON valide, vérifier comme avant
-                            body_str = body.decode('utf-8')
-                            is_attack, attack_type = self.detect_attack(body_str)
-                            if is_attack:
-                                logger.critical(
-                                    f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
-                                    f"in body: {body_str[:200]}"
-                                )
-                                return JSONResponse(
-                                    status_code=status.HTTP_400_BAD_REQUEST,
-                                    content={"detail": "Invalid input detected"}
-                                )
-                except Exception:
-                    pass
+        # IMPORTANT: Ne pas lire le body ici car il sera consommé et FastAPI ne pourra plus le lire
+        # La validation sera faite par Pydantic dans les routers
+        # On vérifie seulement les query parameters et on laisse Pydantic valider le body
         
         response = await call_next(request)
         return response
