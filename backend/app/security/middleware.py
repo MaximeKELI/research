@@ -101,8 +101,9 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
     ]
     
     COMMAND_INJECTION_PATTERNS = [
-        r"[;|`$(){}]",  # Retirer & qui est normal dans les formulaires
-        r"\b(cat|ls|pwd|whoami|id|uname|ps|netstat)\b",
+        r"[;|`$]",  # Caractères de commande shell dangereux (sans parenthèses/accolades qui sont normales)
+        r"\b(cat|ls|pwd|whoami|id|uname|ps|netstat)\s+",  # Commandes shell avec espace après
+        r"(\$\{|`.*`|\$\(.*\))",  # Command substitution: ${}, ``, $()
     ]
     
     # Endpoints où on ignore la validation stricte (formulaires normaux)
@@ -132,11 +133,21 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
         if self.xss_pattern.search(value):
             return True, "XSS"
         
-        # Vérifier command injection (mais ignorer & et @ qui sont normaux)
+        # Vérifier command injection (mais ignorer &, @, parenthèses et accolades qui sont normales)
         if self.cmd_pattern.search(value):
-            # Ignorer les emails et les formulaires avec &
+            # Ignorer les emails, les formulaires avec &, et les textes normaux avec parenthèses/accolades
+            # Les parenthèses et accolades seules ne sont pas dangereuses
             if not ('@' in value or '&' in value):
-                return True, "COMMAND_INJECTION"
+                # Vérifier si c'est vraiment une tentative d'injection (command substitution)
+                # et pas juste du texte normal avec des caractères
+                if re.search(r"(\$\{|`.*`|\$\(.*\)|;\s*(cat|ls|pwd|whoami|id|uname|ps|netstat))", value, re.IGNORECASE):
+                    return True, "COMMAND_INJECTION"
+                # Si c'est juste des parenthèses/accolades dans du texte normal, ignorer
+                if re.match(r"^[a-zA-Z0-9\s,.\-(){}]+$", value):
+                    return False, ""
+                # Sinon, vérifier plus strictement
+                if ';' in value or '|' in value or '`' in value or '$' in value:
+                    return True, "COMMAND_INJECTION"
         
         return False, ""
     
@@ -181,17 +192,53 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
                 try:
                     body = await request.body()
                     if body:
-                        body_str = body.decode('utf-8')
-                        is_attack, attack_type = self.detect_attack(body_str)
-                        if is_attack:
-                            logger.critical(
-                                f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
-                                f"in body: {body_str[:200]}"
-                            )
-                            return JSONResponse(
-                                status_code=status.HTTP_400_BAD_REQUEST,
-                                content={"detail": "Invalid input detected"}
-                            )
+                        import json
+                        # Parser le JSON pour vérifier seulement les valeurs, pas la structure
+                        try:
+                            body_json = json.loads(body.decode('utf-8'))
+                            # Vérifier récursivement toutes les valeurs string dans le JSON
+                            attack_result = [False, ""]
+                            def check_json_values(obj, path=""):
+                                if isinstance(obj, dict):
+                                    for key, value in obj.items():
+                                        check_json_values(value, f"{path}.{key}" if path else key)
+                                        if attack_result[0]:
+                                            return
+                                elif isinstance(obj, list):
+                                    for i, item in enumerate(obj):
+                                        check_json_values(item, f"{path}[{i}]")
+                                        if attack_result[0]:
+                                            return
+                                elif isinstance(obj, str):
+                                    is_attack, attack_type = self.detect_attack(obj)
+                                    if is_attack:
+                                        logger.critical(
+                                            f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
+                                            f"in body field {path}: {obj[:100]}"
+                                        )
+                                        attack_result[0] = True
+                                        attack_result[1] = attack_type
+                                        return
+                            
+                            check_json_values(body_json)
+                            if attack_result[0]:
+                                return JSONResponse(
+                                    status_code=status.HTTP_400_BAD_REQUEST,
+                                    content={"detail": "Invalid input detected"}
+                                )
+                        except json.JSONDecodeError:
+                            # Si ce n'est pas du JSON valide, vérifier comme avant
+                            body_str = body.decode('utf-8')
+                            is_attack, attack_type = self.detect_attack(body_str)
+                            if is_attack:
+                                logger.critical(
+                                    f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
+                                    f"in body: {body_str[:200]}"
+                                )
+                                return JSONResponse(
+                                    status_code=status.HTTP_400_BAD_REQUEST,
+                                    content={"detail": "Invalid input detected"}
+                                )
                 except Exception:
                     pass
         
