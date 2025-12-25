@@ -11,7 +11,6 @@ from datetime import datetime, timedelta
 import csv
 import io
 from typing import Dict, List
-import pandas as pd
 from reportlab.lib.pagesizes import letter
 from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
 from reportlab.lib.styles import getSampleStyleSheet

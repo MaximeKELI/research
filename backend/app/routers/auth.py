@@ -14,6 +14,11 @@ import logging
 
 router = APIRouter()
 
+PHOTO_DIR = Path("uploads/photos")
+PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+
+logger = logging.getLogger(__name__)
+
 @router.post("/register", response_model=UserResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: Session = Depends(get_db)):
     # Vérifier si l'email existe déjà
