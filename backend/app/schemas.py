@@ -13,6 +13,7 @@ class UserCreate(UserBase):
 
 class UserResponse(UserBase):
     id: int
+    photo_url: Optional[str] = None
     created_at: datetime
     
     class Config:
@@ -39,6 +40,7 @@ class ProfilCandidatResponse(ProfilCandidatBase):
     id: int
     user_id: int
     cv_url: Optional[str] = None
+    photo_url: Optional[str] = None
     created_at: datetime
     
     class Config:
@@ -63,6 +65,7 @@ class EntrepriseUpdate(BaseModel):
 class EntrepriseResponse(EntrepriseBase):
     id: int
     user_id: int
+    photo_url: Optional[str] = None
     validee: bool
     created_at: datetime
     

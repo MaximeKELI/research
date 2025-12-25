@@ -29,6 +29,7 @@ class User(Base):
     email = Column(String, unique=True, index=True, nullable=False)
     mot_de_passe = Column(String, nullable=False)
     role = Column(SQLEnum(Role), nullable=False)
+    photo_url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     
     # Relations
@@ -45,6 +46,7 @@ class ProfilCandidat(Base):
     niveau_etude = Column(String)
     competences = Column(Text)
     cv_url = Column(String)
+    photo_url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
@@ -61,6 +63,7 @@ class Entreprise(Base):
     secteur = Column(String)
     description = Column(Text)
     contact = Column(String)
+    photo_url = Column(String, nullable=True)
     validee = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())

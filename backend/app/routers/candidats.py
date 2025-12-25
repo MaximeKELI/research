@@ -18,6 +18,9 @@ router = APIRouter()
 UPLOAD_DIR = Path("uploads/cv")
 UPLOAD_DIR.mkdir(parents=True, exist_ok=True)
 
+PHOTO_DIR = Path("uploads/photos")
+PHOTO_DIR.mkdir(parents=True, exist_ok=True)
+
 @router.post("/profil", response_model=ProfilCandidatResponse, status_code=status.HTTP_201_CREATED)
 async def create_profil(
     profil_data: ProfilCandidatCreate,
@@ -170,4 +173,71 @@ async def upload_cv(
     db.commit()
     
     return {"message": "CV uploadé avec succès", "cv_url": f"/uploads/{relative_path}"}
+
+@router.post("/upload-photo")
+async def upload_photo(
+    file: UploadFile = File(...),
+    current_user: User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Uploader une photo de profil pour un candidat"""
+    if current_user.role.value != "candidat":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Accès réservé aux candidats"
+        )
+    
+    # Lire le contenu du fichier
+    content = await file.read()
+    
+    # Validation sécurisée du fichier image
+    is_valid, error_msg = validate_file_upload(file.filename, content, max_size=2 * 1024 * 1024, file_type="image")
+    if not is_valid:
+        logger.warning(f"Invalid photo upload attempt: {error_msg}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg
+        )
+    
+    # Sanitizer le nom de fichier
+    safe_filename = sanitize_string(file.filename, max_length=255)
+    if not safe_filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename"
+        )
+    
+    # Générer un nom unique sécurisé
+    file_extension = Path(safe_filename).suffix.lower()
+    # S'assurer que l'extension est valide
+    if file_extension not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+        file_extension = '.jpg'  # Par défaut
+    
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = PHOTO_DIR / unique_filename
+    
+    # Sauvegarder le fichier
+    with open(file_path, "wb") as buffer:
+        buffer.write(content)
+    
+    # Mettre à jour le profil
+    profil = db.query(ProfilCandidat).filter(ProfilCandidat.user_id == current_user.id).first()
+    if not profil:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Profil non trouvé. Créez d'abord votre profil."
+        )
+    
+    # Supprimer l'ancienne photo si existe
+    if profil.photo_url:
+        old_file = Path(PHOTO_DIR) / profil.photo_url.split('/')[-1]
+        if old_file.exists():
+            old_file.unlink()
+    
+    # Stocker le chemin relatif pour l'URL
+    relative_path = f"photos/{unique_filename}"
+    profil.photo_url = relative_path
+    db.commit()
+    
+    return {"message": "Photo uploadée avec succès", "photo_url": f"/uploads/{relative_path}"}
 
