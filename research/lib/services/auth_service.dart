@@ -106,9 +106,32 @@ class AuthService {
       );
       
       if (response.statusCode == 201 && response.data != null) {
+        final user = User.fromJson(response.data);
+        
+        // Sauvegarder les infos utilisateur dans SharedPreferences
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('user_email', user.email);
+        await prefs.setString('user_role', user.role);
+        await prefs.setInt('user_id', user.id);
+        
+        // Après l'inscription, se connecter automatiquement pour obtenir le token
+        try {
+          final loginResult = await login(email, password);
+          if (loginResult['success'] == true) {
+            return {
+              'success': true,
+              'user': user,
+              'token': loginResult['token'],
+            };
+          }
+        } catch (e) {
+          // Si la connexion automatique échoue, on retourne quand même le succès
+          // L'utilisateur devra se connecter manuellement
+        }
+        
         return {
           'success': true,
-          'user': User.fromJson(response.data),
+          'user': user,
         };
       } else {
         return {
