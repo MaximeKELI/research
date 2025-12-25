@@ -74,9 +74,20 @@ class Entreprise(Base):
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     nom = Column(String, nullable=False)
-    secteur = Column(String)
-    description = Column(Text)
-    contact = Column(String)
+    secteur = Column(String, nullable=True)
+    description = Column(Text, nullable=True)
+    contact = Column(String, nullable=True)
+    telephone = Column(String, nullable=True)
+    email_contact = Column(String, nullable=True)
+    adresse = Column(String, nullable=True)
+    ville = Column(String, nullable=True)
+    pays = Column(String, nullable=True)
+    code_postal = Column(String, nullable=True)
+    site_web = Column(String, nullable=True)
+    taille_entreprise = Column(String, nullable=True)  # Startup, PME, Grande entreprise
+    nombre_employes = Column(Integer, nullable=True)
+    annee_creation = Column(Integer, nullable=True)
+    type_entreprise = Column(String, nullable=True)  # Privée, Publique, ONG, etc.
     photo_url = Column(String, nullable=True)
     validee = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
@@ -94,10 +105,21 @@ class Offre(Base):
     titre = Column(String, nullable=False)
     description = Column(Text, nullable=False)
     type = Column(SQLEnum(TypeOffre), nullable=False)
-    lieu = Column(String)
-    salaire = Column(String)
-    date_limite = Column(Date)
+    lieu = Column(String, nullable=True)
+    ville = Column(String, nullable=True)
+    pays = Column(String, nullable=True)
+    type_contrat = Column(String, nullable=True)  # CDI, CDD, Stage, Freelance, etc.
+    salaire_min = Column(Integer, nullable=True)  # Salaire minimum
+    salaire_max = Column(Integer, nullable=True)  # Salaire maximum
+    salaire = Column(String, nullable=True)  # Gardé pour compatibilité
+    experience_requise = Column(String, nullable=True)  # 0-2 ans, 3-5 ans, etc.
+    niveau_etude_requis = Column(String, nullable=True)
+    competences_requises = Column(Text, nullable=True)
+    avantages = Column(Text, nullable=True)  # Avantages proposés
+    date_limite = Column(Date, nullable=True)
     statut = Column(SQLEnum(StatutOffre), default=StatutOffre.ACTIVE)
+    nombre_vues = Column(Integer, default=0)  # Statistiques
+    nombre_candidatures = Column(Integer, default=0)  # Statistiques
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
     
