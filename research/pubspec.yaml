@@ -34,6 +34,15 @@ dependencies:
   # PDF viewer
   pdf: ^3.10.7
   open_file: ^3.5.2
+  
+  # Charts and data visualization
+  fl_chart: ^0.66.0
+  
+  # CSV export
+  csv: ^5.0.2
+  
+  # Date picker
+  flutter_datetime_picker_plus: ^2.1.0
 
 dev_dependencies:
   flutter_test:
