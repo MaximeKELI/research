@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import '../core/api_client.dart';
 import '../models/candidature.dart';
 
