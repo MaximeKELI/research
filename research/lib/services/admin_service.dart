@@ -3,6 +3,8 @@ import '../core/api_client.dart';
 
 class AdminService {
   final ApiClient _apiClient = ApiClient();
+  
+  Dio get dio => _apiClient.dio;
 
   Future<Map<String, dynamic>?> getStatistiques() async {
     try {
@@ -15,7 +17,7 @@ class AdminService {
     }
   }
 
-  Future<bool> exportCSV(String dataType) async {
+  Future<List<int>?> exportCSV(String dataType) async {
     try {
       final response = await _apiClient.dio.get(
         '/admin/export/csv',
@@ -25,14 +27,16 @@ class AdminService {
         ),
       );
       
-      // Sauvegarder le fichier (sera géré par l'écran)
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        return response.data as List<int>;
+      }
+      return null;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 
-  Future<bool> exportPDF() async {
+  Future<List<int>?> exportPDF() async {
     try {
       final response = await _apiClient.dio.get(
         '/admin/export/pdf',
@@ -41,9 +45,12 @@ class AdminService {
         ),
       );
       
-      return response.statusCode == 200;
+      if (response.statusCode == 200) {
+        return response.data as List<int>;
+      }
+      return null;
     } catch (e) {
-      return false;
+      return null;
     }
   }
 }
