@@ -1,23 +1,12 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:research/lib/services/auth_service.dart';
-import 'package:research/lib/core/api_client.dart';
-import 'package:dio/dio.dart';
-import 'package:mocktail/mocktail.dart';
+import '../../lib/services/auth_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
-class MockDio extends Mock implements Dio {}
-class MockResponse extends Mock implements Response {}
 
 void main() {
   late AuthService authService;
-  late MockDio mockDio;
-  late MockResponse mockResponse;
 
   setUp(() {
-    mockDio = MockDio();
-    mockResponse = MockResponse();
     authService = AuthService();
-    // Note: En production, il faudrait injecter le Dio mock
   });
 
   group('AuthService', () {
