@@ -272,7 +272,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                 PieChartData(
                   sections: entries.asMap().entries.map((entry) {
                     final index = entry.key;
-                    final genre = entry.value.key;
                     final count = entry.value.value as int;
                     final total = genreData.values.fold<int>(0, (sum, v) => sum + (v as int));
                     final percentage = (count / total * 100);
@@ -367,7 +366,6 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
                   borderData: FlBorderData(show: false),
                   barGroups: top5.asMap().entries.map((entry) {
                     final index = entry.key;
-                    final secteur = entry.value.key;
                     final count = entry.value.value as int;
                     return BarChartGroupData(
                       x: index,

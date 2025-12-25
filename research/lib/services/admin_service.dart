@@ -10,7 +10,7 @@ class AdminService {
     try {
       final response = await _apiClient.dio.get('/admin/statistiques');
       return response.data as Map<String, dynamic>;
-    } on DioException catch (e) {
+    } on DioException {
       return null;
     } catch (e) {
       return null;
