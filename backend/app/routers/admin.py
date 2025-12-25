@@ -1,11 +1,21 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
+from fastapi.responses import StreamingResponse
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, extract
 from app.database import get_db
 from app import auth
 from app.models import User, Entreprise, Offre, Candidature, ProfilCandidat
 from app.schemas import EntrepriseResponse, OffreResponse
 from app.auth import require_role
+from datetime import datetime, timedelta
+import csv
+import io
+from typing import Dict, List
+import pandas as pd
+from reportlab.lib.pagesizes import letter
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+from reportlab.lib.styles import getSampleStyleSheet
+from reportlab.lib import colors
 
 router = APIRouter()
 
