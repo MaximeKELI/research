@@ -72,7 +72,7 @@ class SecurePassword(str):
         return v
 
 
-def sanitize_string(value: str, max_length: int = 1000) -> str:
+def sanitize_string(value: str, max_length: int = 1000, allow_html: bool = False) -> str:
     """Sanitizer une chaîne de caractères"""
     if not isinstance(value, str):
         return ""
@@ -81,19 +81,21 @@ def sanitize_string(value: str, max_length: int = 1000) -> str:
     if len(value) > max_length:
         value = value[:max_length]
     
-    # Échapper les caractères HTML
-    value = escape(value)
+    # Si on permet HTML, ne pas échapper
+    if not allow_html:
+        # Échapper les caractères HTML
+        value = escape(value)
+        
+        # Nettoyer avec bleach
+        value = bleach.clean(
+            value,
+            tags=[],
+            attributes=[],
+            styles=[],
+            strip=True
+        )
     
-    # Nettoyer avec bleach
-    value = bleach.clean(
-        value,
-        tags=[],
-        attributes=[],
-        styles=[],
-        strip=True
-    )
-    
-    # Supprimer les caractères de contrôle
+    # Supprimer les caractères de contrôle (mais garder les caractères normaux)
     value = ''.join(char for char in value if ord(char) >= 32 or char in '\n\r\t')
     
     return value.strip()
