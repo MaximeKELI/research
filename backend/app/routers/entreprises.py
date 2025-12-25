@@ -1,11 +1,20 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, UploadFile, File
 from sqlalchemy.orm import Session
 from app.database import get_db
 from app import auth
 from app.models import User, Entreprise
 from app.schemas import EntrepriseCreate, EntrepriseUpdate, EntrepriseResponse
+from app.security.validation import sanitize_string, validate_file_upload
+import uuid
+from pathlib import Path
+import logging
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter()
+
+PHOTO_DIR = Path("uploads/photos")
+PHOTO_DIR.mkdir(parents=True, exist_ok=True)
 
 @router.post("/profil", response_model=EntrepriseResponse, status_code=status.HTTP_201_CREATED)
 async def create_profil_entreprise(

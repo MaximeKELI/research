@@ -119,33 +119,61 @@ def sanitize_text(value: str, max_length: int = 10000) -> str:
     return value.strip()
 
 
-def validate_file_upload(filename: str, content: bytes, max_size: int = 5 * 1024 * 1024) -> tuple[bool, str]:
-    """Valider un upload de fichier"""
+def validate_file_upload(filename: str, content: bytes, max_size: int = 5 * 1024 * 1024, file_type: str = "pdf") -> tuple[bool, str]:
+    """Valider un upload de fichier
+    
+    Args:
+        filename: Nom du fichier
+        content: Contenu du fichier en bytes
+        max_size: Taille maximale en bytes (défaut: 5MB)
+        file_type: Type de fichier attendu ("pdf" ou "image")
+    """
     # Vérifier la taille
     if len(content) > max_size:
-        return False, "File too large"
-    
+        return False, f"File too large (max {max_size // (1024*1024)}MB)"
+
     if len(content) == 0:
         return False, "Empty file"
-    
-    # Vérifier l'extension
-    allowed_extensions = ['.pdf']
-    if not any(filename.lower().endswith(ext) for ext in allowed_extensions):
-        return False, "Invalid file type"
-    
+
     # Vérifier le nom du fichier
     if len(filename) > 255:
         return False, "Filename too long"
-    
+
     # Vérifier les caractères dangereux dans le nom
     dangerous_chars = ['/', '\\', '..', '<', '>', ':', '"', '|', '?', '*']
     if any(char in filename for char in dangerous_chars):
         return False, "Invalid filename"
-    
-    # Vérifier le magic number pour PDF
-    if filename.lower().endswith('.pdf'):
+
+    if file_type == "pdf":
+        # Vérifier l'extension pour PDF
+        allowed_extensions = ['.pdf']
+        if not any(filename.lower().endswith(ext) for ext in allowed_extensions):
+            return False, "Invalid file type. Only PDF files are allowed"
+        
+        # Vérifier le magic number pour PDF
         if not content.startswith(b'%PDF'):
-            return False, "Invalid PDF file"
+            return False, "Invalid PDF file content"
     
+    elif file_type == "image":
+        # Vérifier l'extension pour images
+        allowed_extensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp']
+        if not any(filename.lower().endswith(ext) for ext in allowed_extensions):
+            return False, "Invalid file type. Only JPG, PNG, GIF, and WEBP images are allowed"
+        
+        # Vérifier le magic number pour images
+        # JPEG: FF D8 FF
+        # PNG: 89 50 4E 47
+        # GIF: 47 49 46 38
+        # WEBP: 52 49 46 46 (RIFF) suivi de WEBP
+        is_valid_image = (
+            content.startswith(b'\xFF\xD8\xFF') or  # JPEG
+            content.startswith(b'\x89PNG\r\n\x1a\n') or  # PNG
+            content.startswith(b'GIF89a') or  # GIF89a
+            content.startswith(b'GIF87a') or  # GIF87a
+            (content.startswith(b'RIFF') and b'WEBP' in content[:20])  # WEBP
+        )
+        if not is_valid_image:
+            return False, "Invalid image file content"
+
     return True, "OK"
 
