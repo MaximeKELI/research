@@ -1,9 +1,9 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:research/lib/models/user.dart';
-import 'package:research/lib/models/profil_candidat.dart';
-import 'package:research/lib/models/entreprise.dart';
-import 'package:research/lib/models/offre.dart';
-import 'package:research/lib/models/candidature.dart';
+import '../lib/models/user.dart';
+import '../lib/models/profil_candidat.dart';
+import '../lib/models/entreprise.dart';
+import '../lib/models/offre.dart';
+import '../lib/models/candidature.dart';
 
 void main() {
   group('User Model', () {
