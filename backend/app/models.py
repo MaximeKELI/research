@@ -43,9 +43,23 @@ class ProfilCandidat(Base):
     user_id = Column(Integer, ForeignKey("users.id"), unique=True, nullable=False)
     nom = Column(String, nullable=False)
     prenom = Column(String, nullable=False)
-    niveau_etude = Column(String)
-    competences = Column(Text)
-    cv_url = Column(String)
+    date_naissance = Column(Date, nullable=True)  # Pour calculer l'âge
+    genre = Column(String, nullable=True)  # M, F, Autre
+    telephone = Column(String, nullable=True)
+    adresse = Column(String, nullable=True)
+    ville = Column(String, nullable=True)
+    pays = Column(String, nullable=True)
+    code_postal = Column(String, nullable=True)
+    niveau_etude = Column(String, nullable=True)
+    domaine_etude = Column(String, nullable=True)  # Informatique, Commerce, etc.
+    annee_obtention = Column(Integer, nullable=True)
+    competences = Column(Text, nullable=True)
+    annees_experience = Column(Integer, nullable=True)  # Nombre d'années d'expérience
+    secteur_experience = Column(String, nullable=True)  # Secteur d'activité
+    statut_professionnel = Column(String, nullable=True)  # Étudiant, Employé, Chômeur, etc.
+    disponibilite = Column(String, nullable=True)  # Immédiate, 1 mois, 3 mois, etc.
+    salaire_souhaite = Column(String, nullable=True)
+    cv_url = Column(String, nullable=True)
     photo_url = Column(String, nullable=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
