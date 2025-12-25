@@ -5,6 +5,7 @@ class Entreprise {
   final String? secteur;
   final String? description;
   final String? contact;
+  final String? photoUrl;
   final bool validee;
   final DateTime createdAt;
 
@@ -15,6 +16,7 @@ class Entreprise {
     this.secteur,
     this.description,
     this.contact,
+    this.photoUrl,
     required this.validee,
     required this.createdAt,
   });
@@ -27,6 +29,7 @@ class Entreprise {
       secteur: json['secteur'],
       description: json['description'],
       contact: json['contact'],
+      photoUrl: json['photo_url'],
       validee: json['validee'],
       createdAt: DateTime.parse(json['created_at']),
     );
@@ -40,6 +43,7 @@ class Entreprise {
       'secteur': secteur,
       'description': description,
       'contact': contact,
+      'photo_url': photoUrl,
       'validee': validee,
       'created_at': createdAt.toIso8601String(),
     };

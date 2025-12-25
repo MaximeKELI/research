@@ -6,6 +6,7 @@ class ProfilCandidat {
   final String? niveauEtude;
   final String? competences;
   final String? cvUrl;
+  final String? photoUrl;
   final DateTime createdAt;
 
   ProfilCandidat({
@@ -16,6 +17,7 @@ class ProfilCandidat {
     this.niveauEtude,
     this.competences,
     this.cvUrl,
+    this.photoUrl,
     required this.createdAt,
   });
 
@@ -28,6 +30,7 @@ class ProfilCandidat {
       niveauEtude: json['niveau_etude'],
       competences: json['competences'],
       cvUrl: json['cv_url'],
+      photoUrl: json['photo_url'],
       createdAt: DateTime.parse(json['created_at']),
     );
   }
@@ -41,6 +44,7 @@ class ProfilCandidat {
       'niveau_etude': niveauEtude,
       'competences': competences,
       'cv_url': cvUrl,
+      'photo_url': photoUrl,
       'created_at': createdAt.toIso8601String(),
     };
   }
