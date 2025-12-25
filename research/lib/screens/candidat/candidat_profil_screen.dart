@@ -298,6 +298,45 @@ class _CandidatProfilScreenState extends State<CandidatProfilScreen> {
                 ),
               ),
             const SizedBox(height: 16),
+            // Photo de profil
+            Center(
+              child: Stack(
+                children: [
+                  CircleAvatar(
+                    radius: 60,
+                    backgroundColor: Colors.grey[300],
+                    backgroundImage: _profil?.photoUrl != null
+                        ? NetworkImage('${ApiConfig.baseUrl}${_profil!.photoUrl!}')
+                        : null,
+                    child: _profil?.photoUrl == null
+                        ? const Icon(Icons.person, size: 60, color: Colors.grey)
+                        : null,
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    right: 0,
+                    child: CircleAvatar(
+                      radius: 18,
+                      backgroundColor: Theme.of(context).colorScheme.primary,
+                      child: IconButton(
+                        icon: const Icon(Icons.camera_alt, size: 18, color: Colors.white),
+                        onPressed: _uploadPhoto,
+                        padding: EdgeInsets.zero,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 8),
+            Center(
+              child: TextButton.icon(
+                onPressed: _uploadPhoto,
+                icon: const Icon(Icons.photo_library),
+                label: Text(_profil?.photoUrl != null ? 'Changer la photo' : 'Ajouter une photo'),
+              ),
+            ),
+            const SizedBox(height: 16),
             TextField(
               controller: _nomController,
               enabled: _isEditing || _profil == null,
