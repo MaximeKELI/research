@@ -10,6 +10,13 @@ class CandidatService {
     try {
       final response = await _apiClient.dio.get('/candidats/profil');
       return ProfilCandidat.fromJson(response.data);
+    } on DioException catch (e) {
+      // 404 est normal si le profil n'existe pas encore
+      if (e.response?.statusCode == 404) {
+        return null;
+      }
+      // Autres erreurs
+      return null;
     } catch (e) {
       return null;
     }
@@ -71,6 +78,13 @@ class CandidatService {
         data: formData,
       );
       return true;
+    } on DioException catch (e) {
+      // 404 signifie que le profil n'existe pas encore
+      if (e.response?.statusCode == 404) {
+        return false;
+      }
+      // Autres erreurs
+      return false;
     } catch (e) {
       return false;
     }

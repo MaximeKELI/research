@@ -22,6 +22,13 @@ class CandidatureService {
       return (response.data as List)
           .map((json) => Candidature.fromJson(json))
           .toList();
+    } on DioException catch (e) {
+      // 404 est normal si le profil n'existe pas encore
+      if (e.response?.statusCode == 404) {
+        return [];
+      }
+      // Autres erreurs
+      return [];
     } catch (e) {
       return [];
     }
