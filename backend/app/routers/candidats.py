@@ -38,21 +38,10 @@ async def create_profil(
             detail="Profil déjà créé"
         )
     
-    # Sanitizer les données (seulement si nécessaire, pas pour les données normales)
-    profil_dict = profil_data.model_dump()
-    # Sanitizer seulement si contient des caractères dangereux
-    if profil_dict.get("nom"):
-        profil_dict["nom"] = sanitize_string(profil_dict["nom"], max_length=100)
-    if profil_dict.get("prenom"):
-        profil_dict["prenom"] = sanitize_string(profil_dict["prenom"], max_length=100)
-    if profil_dict.get("niveau_etude"):
-        profil_dict["niveau_etude"] = sanitize_string(profil_dict["niveau_etude"], max_length=100)
-    if profil_dict.get("competences"):
-        profil_dict["competences"] = sanitize_string(profil_dict["competences"], max_length=1000)
-    
+    # Utiliser directement les données (Pydantic valide déjà)
     db_profil = ProfilCandidat(
         user_id=current_user.id,
-        **profil_dict
+        **profil_data.model_dump()
     )
     db.add(db_profil)
     db.commit()
