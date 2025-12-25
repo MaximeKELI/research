@@ -1,9 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:research/lib/core/api_client.dart';
-import 'package:research/lib/services/auth_service.dart';
-import 'package:research/lib/services/offre_service.dart';
-import 'package:research/lib/services/candidat_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../lib/core/api_client.dart';
+import '../lib/services/auth_service.dart';
+import '../lib/services/offre_service.dart';
+import '../lib/services/candidat_service.dart';
 
 void main() {
   group('Integration Tests', () {
