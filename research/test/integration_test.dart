@@ -1,8 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:research/core/api_client.dart';
-import 'package:research/services/auth_service.dart';
-import 'package:research/services/offre_service.dart';
-import 'package:research/services/candidat_service.dart';
+import 'package:research/lib/core/api_client.dart';
+import 'package:research/lib/services/auth_service.dart';
+import 'package:research/lib/services/offre_service.dart';
+import 'package:research/lib/services/candidat_service.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 void main() {
