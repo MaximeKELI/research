@@ -1,16 +1,10 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:research/lib/providers/auth_provider.dart';
-import 'package:research/lib/services/auth_service.dart';
-import 'package:mocktail/mocktail.dart';
-
-class MockAuthService extends Mock implements AuthService {}
+import '../../lib/providers/auth_provider.dart';
 
 void main() {
   late AuthProvider authProvider;
-  late MockAuthService mockAuthService;
 
   setUp(() {
-    mockAuthService = MockAuthService();
     authProvider = AuthProvider();
   });
 
