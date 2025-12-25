@@ -8,7 +8,8 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseSettings):
-    database_url: str = os.getenv("DATABASE_URL", "postgresql://user:password@localhost:5432/jobapp_db")
+    # Utiliser SQLite par défaut, PostgreSQL si spécifié dans .env
+    database_url: str = os.getenv("DATABASE_URL", "sqlite:///./jobapp.db")
     secret_key: str = os.getenv("SECRET_KEY", "your-secret-key")
     algorithm: str = os.getenv("ALGORITHM", "HS256")
     access_token_expire_minutes: int = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
@@ -16,7 +17,15 @@ class Settings(BaseSettings):
 
 settings = Settings()
 
-engine = create_engine(settings.database_url)
+# Configuration spéciale pour SQLite
+if settings.database_url.startswith("sqlite"):
+    engine = create_engine(
+        settings.database_url,
+        connect_args={"check_same_thread": False}  # Nécessaire pour SQLite
+    )
+else:
+    engine = create_engine(settings.database_url)
+
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
