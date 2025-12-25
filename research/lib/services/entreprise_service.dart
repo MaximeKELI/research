@@ -59,6 +59,30 @@ class EntrepriseService {
       return null;
     }
   }
+
+  Future<bool> uploadPhoto(File file) async {
+    try {
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
+      });
+
+      final response = await _apiClient.dio.post(
+        '/entreprises/upload-photo',
+        data: formData,
+      );
+      return response.statusCode == 200;
+    } on DioException catch (e) {
+      if (e.response?.statusCode == 404) {
+        return false;
+      }
+      if (e.response?.statusCode == 400) {
+        return false;
+      }
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 
