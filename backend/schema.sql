@@ -74,3 +74,4 @@ INSERT INTO users (email, mot_de_passe, role)
 VALUES ('admin@jobapp.com', '$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LewY5GyY5Y5Y5Y5Y5', 'admin')
 ON CONFLICT (email) DO NOTHING;
 
+

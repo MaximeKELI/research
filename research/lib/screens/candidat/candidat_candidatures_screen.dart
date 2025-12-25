@@ -94,3 +94,4 @@ class _CandidatCandidaturesScreenState extends State<CandidatCandidaturesScreen>
   }
 }
 
+

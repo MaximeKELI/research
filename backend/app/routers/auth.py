@@ -52,3 +52,4 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 async def get_current_user_info(current_user: User = Depends(auth.get_current_user)):
     return current_user
 
+

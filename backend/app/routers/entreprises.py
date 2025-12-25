@@ -82,3 +82,4 @@ async def update_profil_entreprise(
     db.refresh(entreprise)
     return entreprise
 
+

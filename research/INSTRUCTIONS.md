@@ -144,3 +144,4 @@ lib/
 - Les appels API sont gérés via Dio avec intercepteurs pour l'authentification
 - L'interface est optimisée pour les appareils à faible performance
 
+

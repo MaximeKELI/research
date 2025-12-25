@@ -101,3 +101,4 @@ class Candidature(Base):
     candidat = relationship("ProfilCandidat", back_populates="candidatures")
     offre = relationship("Offre", back_populates="candidatures")
 
+

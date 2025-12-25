@@ -202,3 +202,4 @@ class TestOffres:
         response = client.get(f"/api/offres/{offre_id}")
         assert response.status_code == status.HTTP_404_NOT_FOUND
 
+

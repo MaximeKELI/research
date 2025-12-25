@@ -174,3 +174,4 @@ async def delete_offre(
     db.commit()
     return None
 
+

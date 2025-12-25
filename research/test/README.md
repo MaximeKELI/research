@@ -69,3 +69,4 @@ class MockAuthService extends Mock implements AuthService {}
 - Utilisez `SharedPreferences.setMockInitialValues()` pour les tests de stockage
 - Les tests asynchrones utilisent `await tester.pumpAndSettle()`
 
+

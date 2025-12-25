@@ -134,3 +134,4 @@ class Login(BaseModel):
     email: EmailStr
     mot_de_passe: str
 
+

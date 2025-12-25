@@ -225,3 +225,4 @@ class TestIntegration:
         candidatures = response.json()
         assert any(c["statut"] == "accepté" for c in candidatures)
 
+

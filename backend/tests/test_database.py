@@ -253,3 +253,4 @@ class TestDatabase:
         with pytest.raises(IntegrityError):
             db.commit()
 
+

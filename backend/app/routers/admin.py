@@ -99,3 +99,4 @@ async def get_statistiques(
         "total_candidatures": total_candidatures
     }
 
+

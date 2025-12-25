@@ -164,3 +164,4 @@ class TestCandidatures:
         data = response.json()
         assert data["statut"] == "accepté"
 
+

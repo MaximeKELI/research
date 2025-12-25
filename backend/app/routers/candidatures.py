@@ -154,3 +154,4 @@ async def update_statut_candidature(
     db.refresh(candidature)
     return candidature
 
+

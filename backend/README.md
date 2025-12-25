@@ -51,3 +51,4 @@ Une fois l'application lancée, accédez à:
 - `/api/candidatures/` - Gestion des candidatures
 - `/api/admin/` - Administration (réservé aux admins)
 
+
