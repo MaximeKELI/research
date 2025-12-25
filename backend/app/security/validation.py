@@ -86,14 +86,13 @@ def sanitize_string(value: str, max_length: int = 1000, allow_html: bool = False
         # Échapper les caractères HTML
         value = escape(value)
         
-        # Nettoyer avec bleach
-        value = bleach.clean(
-            value,
-            tags=[],
-            attributes=[],
-            styles=[],
-            strip=True
-        )
+    # Nettoyer avec bleach
+    value = bleach.clean(
+        value,
+        tags=[],
+        attributes=[],
+        strip=True
+    )
     
     # Supprimer les caractères de contrôle (mais garder les caractères normaux)
     value = ''.join(char for char in value if ord(char) >= 32 or char in '\n\r\t')
@@ -114,7 +113,6 @@ def sanitize_text(value: str, max_length: int = 10000) -> str:
         value,
         tags=['p', 'br'],
         attributes={},
-        styles=[],
         strip=True
     )
     
