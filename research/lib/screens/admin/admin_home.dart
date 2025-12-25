@@ -48,9 +48,7 @@ class AdminHome extends StatelessWidget {
           ),
         ],
       ),
-      body: const Center(
-        child: Text('Espace Admin - À implémenter'),
-      ),
+      body: const AdminDashboardScreen(),
     );
   }
 }

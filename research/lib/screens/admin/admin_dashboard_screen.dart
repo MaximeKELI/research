@@ -4,7 +4,6 @@ import 'package:intl/intl.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import '../../services/admin_service.dart';
-import '../../core/config.dart';
 
 class AdminDashboardScreen extends StatefulWidget {
   const AdminDashboardScreen({super.key});
@@ -38,22 +37,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _exportCSV(String dataType) async {
     try {
-      final response = await _service._apiClient.dio.get(
-        '/admin/export/csv',
-        queryParameters: {'data_type': dataType},
-        options: Options(responseType: ResponseType.bytes),
-      );
-
-      if (response.statusCode == 200) {
+      final data = await _service.exportCSV(dataType);
+      
+      if (data != null) {
         final directory = await getApplicationDocumentsDirectory();
         final file = File('${directory.path}/${dataType}_${DateFormat('yyyyMMdd').format(DateTime.now())}.csv');
-        await file.writeAsBytes(response.data);
+        await file.writeAsBytes(data);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Fichier CSV exporté: ${file.path}'),
               backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors de l\'export CSV'),
+              backgroundColor: Colors.red,
             ),
           );
         }
@@ -72,21 +76,27 @@ class _AdminDashboardScreenState extends State<AdminDashboardScreen> {
 
   Future<void> _exportPDF() async {
     try {
-      final response = await _service._apiClient.dio.get(
-        '/admin/export/pdf',
-        options: Options(responseType: ResponseType.bytes),
-      );
-
-      if (response.statusCode == 200) {
+      final data = await _service.exportPDF();
+      
+      if (data != null) {
         final directory = await getApplicationDocumentsDirectory();
         final file = File('${directory.path}/statistiques_${DateFormat('yyyyMMdd').format(DateTime.now())}.pdf');
-        await file.writeAsBytes(response.data);
+        await file.writeAsBytes(data);
         
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text('Fichier PDF exporté: ${file.path}'),
               backgroundColor: Colors.green,
+            ),
+          );
+        }
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors de l\'export PDF'),
+              backgroundColor: Colors.red,
             ),
           );
         }
