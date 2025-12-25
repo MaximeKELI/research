@@ -107,6 +107,51 @@ class _CandidatProfilScreenState extends State<CandidatProfilScreen> {
   }
 
   Future<void> _uploadCV() async {
+    // Vérifier si le profil existe, sinon le créer d'abord
+    if (_profil == null) {
+      // Vérifier que les champs obligatoires sont remplis
+      if (_nomController.text.isEmpty || _prenomController.text.isEmpty) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Veuillez remplir au moins le nom et le prénom avant d\'uploader le CV'),
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+        return;
+      }
+      
+      // Créer le profil d'abord
+      final newProfil = await _service.createProfil(
+        nom: _nomController.text,
+        prenom: _prenomController.text,
+        niveauEtude: _niveauEtudeController.text.isEmpty
+            ? null
+            : _niveauEtudeController.text,
+        competences: _competencesController.text.isEmpty
+            ? null
+            : _competencesController.text,
+      );
+      
+      if (newProfil == null) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Erreur lors de la création du profil. Veuillez réessayer.'),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
+        return;
+      }
+      
+      setState(() {
+        _profil = newProfil;
+      });
+    }
+
+    // Maintenant uploader le CV
     final result = await FilePicker.platform.pickFiles(
       type: FileType.custom,
       allowedExtensions: ['pdf'],
@@ -128,7 +173,7 @@ class _CandidatProfilScreenState extends State<CandidatProfilScreen> {
         } else {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text('Erreur lors de l\'upload du CV'),
+              content: Text('Erreur lors de l\'upload du CV. Vérifiez que le fichier est un PDF valide (max 5MB).'),
               backgroundColor: Colors.red,
             ),
           );

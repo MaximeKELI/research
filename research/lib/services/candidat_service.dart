@@ -73,14 +73,20 @@ class CandidatService {
         'file': await MultipartFile.fromFile(file.path, filename: file.path.split('/').last),
       });
 
-      await _apiClient.dio.post(
+      final response = await _apiClient.dio.post(
         '/candidats/upload-cv',
         data: formData,
       );
-      return true;
+      return response.statusCode == 200;
     } on DioException catch (e) {
       // 404 signifie que le profil n'existe pas encore
       if (e.response?.statusCode == 404) {
+        // Le message d'erreur sera géré par l'écran
+        return false;
+      }
+      // 400 signifie erreur de validation (fichier invalide, trop gros, etc.)
+      if (e.response?.statusCode == 400) {
+        // Le message d'erreur sera géré par l'écran
         return false;
       }
       // Autres erreurs
