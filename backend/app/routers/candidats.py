@@ -38,18 +38,21 @@ async def create_profil(
             detail="Profil déjà créé"
         )
     
-    # Sanitizer les données
-    sanitized_data = profil_data.model_dump()
-    sanitized_data["nom"] = sanitize_string(sanitized_data.get("nom", ""), max_length=100)
-    sanitized_data["prenom"] = sanitize_string(sanitized_data.get("prenom", ""), max_length=100)
-    if sanitized_data.get("niveau_etude"):
-        sanitized_data["niveau_etude"] = sanitize_string(sanitized_data["niveau_etude"], max_length=100)
-    if sanitized_data.get("competences"):
-        sanitized_data["competences"] = sanitize_string(sanitized_data["competences"], max_length=1000)
+    # Sanitizer les données (seulement si nécessaire, pas pour les données normales)
+    profil_dict = profil_data.model_dump()
+    # Sanitizer seulement si contient des caractères dangereux
+    if profil_dict.get("nom"):
+        profil_dict["nom"] = sanitize_string(profil_dict["nom"], max_length=100)
+    if profil_dict.get("prenom"):
+        profil_dict["prenom"] = sanitize_string(profil_dict["prenom"], max_length=100)
+    if profil_dict.get("niveau_etude"):
+        profil_dict["niveau_etude"] = sanitize_string(profil_dict["niveau_etude"], max_length=100)
+    if profil_dict.get("competences"):
+        profil_dict["competences"] = sanitize_string(profil_dict["competences"], max_length=1000)
     
     db_profil = ProfilCandidat(
         user_id=current_user.id,
-        **sanitized_data
+        **profil_dict
     )
     db.add(db_profil)
     db.commit()
