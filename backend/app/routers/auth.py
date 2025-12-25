@@ -52,5 +52,58 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends(), db: Session = 
 async def get_current_user_info(current_user: User = Depends(auth.get_current_user)):
     return current_user
 
+@router.post("/upload-photo")
+async def upload_user_photo(
+    file: UploadFile = File(...),
+    current_user: User = Depends(auth.get_current_user),
+    db: Session = Depends(get_db)
+):
+    """Uploader une photo de profil pour n'importe quel utilisateur"""
+    # Lire le contenu du fichier
+    content = await file.read()
+    
+    # Validation sécurisée du fichier image
+    is_valid, error_msg = validate_file_upload(file.filename, content, max_size=2 * 1024 * 1024, file_type="image")
+    if not is_valid:
+        logger.warning(f"Invalid photo upload attempt: {error_msg}")
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=error_msg
+        )
+    
+    # Sanitizer le nom de fichier
+    safe_filename = sanitize_string(file.filename, max_length=255)
+    if not safe_filename:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Invalid filename"
+        )
+    
+    # Générer un nom unique sécurisé
+    file_extension = Path(safe_filename).suffix.lower()
+    # S'assurer que l'extension est valide
+    if file_extension not in ['.jpg', '.jpeg', '.png', '.gif', '.webp']:
+        file_extension = '.jpg'  # Par défaut
+    
+    unique_filename = f"{uuid.uuid4()}{file_extension}"
+    file_path = PHOTO_DIR / unique_filename
+    
+    # Sauvegarder le fichier
+    with open(file_path, "wb") as buffer:
+        buffer.write(content)
+    
+    # Supprimer l'ancienne photo si existe
+    if current_user.photo_url:
+        old_file = Path(PHOTO_DIR) / current_user.photo_url.split('/')[-1]
+        if old_file.exists():
+            old_file.unlink()
+    
+    # Stocker le chemin relatif pour l'URL
+    relative_path = f"photos/{unique_filename}"
+    current_user.photo_url = relative_path
+    db.commit()
+    
+    return {"message": "Photo uploadée avec succès", "photo_url": f"/uploads/{relative_path}"}
+
 
 
