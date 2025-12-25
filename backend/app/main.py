@@ -31,6 +31,12 @@ app.include_router(offres.router, prefix="/api/offres", tags=["Offres"])
 app.include_router(candidatures.router, prefix="/api/candidatures", tags=["Candidatures"])
 app.include_router(admin.router, prefix="/api/admin", tags=["Admin"])
 
+# Servir les fichiers statiques (CV)
+uploads_dir = "uploads"
+if not os.path.exists(uploads_dir):
+    os.makedirs(uploads_dir)
+app.mount("/uploads", StaticFiles(directory=uploads_dir), name="uploads")
+
 @app.get("/")
 async def root():
     return {"message": "JobApp API - Bienvenue"}
