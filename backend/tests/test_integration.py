@@ -42,7 +42,9 @@ class TestIntegration:
             }
         )
         assert response.status_code == status.HTTP_201_CREATED
-        profil_id = response.json()["id"]
+        profil_data = response.json()
+        assert profil_data["nom"] == "Workflow"
+        profil_id = profil_data["id"]
 
         # 4. Récupérer le profil
         response = client.get(
