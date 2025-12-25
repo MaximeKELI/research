@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:provider/provider.dart';
-import 'package:research/main.dart';
-import 'package:research/providers/auth_provider.dart';
-import 'package:research/providers/offre_provider.dart';
+import 'package:research/lib/main.dart';
+import 'package:research/lib/providers/auth_provider.dart';
+import 'package:research/lib/providers/offre_provider.dart';
 
 void main() {
   testWidgets('App should start with SplashScreen', (WidgetTester tester) async {
