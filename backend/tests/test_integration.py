@@ -122,11 +122,12 @@ class TestIntegration:
     def test_candidat_postule_workflow(self, client, db):
         """Test du workflow complet: candidat postule à une offre"""
         from app.models import Entreprise, User, Offre, TypeOffre, StatutOffre
+        from app.auth import get_password_hash
 
         # 1. Créer entreprise et offre
         entreprise_user = User(
             email="ent_integration@test.com",
-            mot_de_passe="test",
+            mot_de_passe=get_password_hash("test"),
             role="entreprise"
         )
         db.add(entreprise_user)
