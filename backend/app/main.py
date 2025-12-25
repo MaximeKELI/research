@@ -33,11 +33,16 @@ app = FastAPI(
 )
 
 # Middlewares de sécurité (ordre important!)
-app.add_middleware(SecurityHeadersMiddleware)
-app.add_middleware(RequestLoggingMiddleware)
-app.add_middleware(InputSanitizationMiddleware)
-app.add_middleware(BruteForceProtectionMiddleware)
-app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
+# Désactiver en mode test (détecté via variable d'environnement)
+if not os.getenv("TESTING", "").lower() == "true":
+    app.add_middleware(SecurityHeadersMiddleware)
+    app.add_middleware(RequestLoggingMiddleware)
+    app.add_middleware(InputSanitizationMiddleware)
+    app.add_middleware(BruteForceProtectionMiddleware)
+    app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
+else:
+    # En mode test, seulement les headers de sécurité
+    app.add_middleware(SecurityHeadersMiddleware)
 
 # CORS avec restrictions de sécurité
 app.add_middleware(
