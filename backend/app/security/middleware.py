@@ -100,14 +100,14 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
     ]
     
     COMMAND_INJECTION_PATTERNS = [
-        r"[;&|`$(){}]",
+        r"[;|`$(){}]",  # Retirer & qui est normal dans les formulaires
         r"\b(cat|ls|pwd|whoami|id|uname|ps|netstat)\b",
     ]
     
-    # Patterns à ignorer (formulaires normaux)
-    SAFE_PATTERNS = [
-        r"username=[^&]*&password=",  # Formulaire de login
-        r"email=[^&]*",  # Email dans les formulaires
+    # Endpoints où on ignore la validation stricte (formulaires normaux)
+    IGNORE_VALIDATION_PATHS = [
+        "/api/auth/login",
+        "/api/auth/register",
     ]
     
     def __init__(self, app: ASGIApp):
@@ -121,50 +121,61 @@ class InputSanitizationMiddleware(BaseHTTPMiddleware):
         if not isinstance(value, str):
             return False, ""
         
-        # Ignorer les patterns sûrs (formulaires normaux)
-        for safe_pattern in self.SAFE_PATTERNS:
-            if re.search(safe_pattern, value, re.IGNORECASE):
-                # C'est un formulaire normal, vérifier seulement les patterns vraiment dangereux
-                # mais pas les caractères @ qui sont normaux dans les emails
-                dangerous_sql = re.search(r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b|--|#|/\*|\*/)", value, re.IGNORECASE)
-                if dangerous_sql:
-                    return True, "SQL_INJECTION"
-                dangerous_xss = re.search(r"<script[^>]*>|javascript:|on\w+\s*=", value, re.IGNORECASE)
-                if dangerous_xss:
-                    return True, "XSS"
-                # Pour les commandes, ignorer @ et & qui sont normaux dans les formulaires
-                dangerous_cmd = re.search(r"[;|`$(){}]|\b(cat|ls|pwd|whoami|id|uname|ps|netstat)\b", value, re.IGNORECASE)
-                if dangerous_cmd:
-                    return True, "COMMAND_INJECTION"
-                return False, ""
-        
-        # Pour les autres cas, vérifier tous les patterns
+        # Vérifier SQL injection (mais ignorer les emails normaux avec @)
         if self.sql_pattern.search(value):
-            return True, "SQL_INJECTION"
+            # Ignorer les emails normaux
+            if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', value):
+                return True, "SQL_INJECTION"
+        
+        # Vérifier XSS
         if self.xss_pattern.search(value):
             return True, "XSS"
+        
+        # Vérifier command injection (mais ignorer & et @ qui sont normaux)
         if self.cmd_pattern.search(value):
-            return True, "COMMAND_INJECTION"
+            # Ignorer les emails et les formulaires avec &
+            if not ('@' in value or '&' in value):
+                return True, "COMMAND_INJECTION"
+        
         return False, ""
     
     async def dispatch(self, request: Request, call_next):
-        # Vérifier les query parameters
-        for key, value in request.query_params.items():
-            is_attack, attack_type = self.detect_attack(str(value))
-            if is_attack:
-                logger.critical(
-                    f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
-                    f"in parameter {key}: {value[:100]}"
-                )
-                return JSONResponse(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    content={"detail": "Invalid input detected"}
-                )
+        # Ignorer la validation pour les endpoints d'authentification (formulaires normaux)
+        if any(path in str(request.url.path) for path in self.IGNORE_VALIDATION_PATHS):
+            response = await call_next(request)
+            return response
         
-        # Vérifier le body si c'est du JSON (pas les formulaires)
+        content_type = request.headers.get("content-type", "")
+        
+        # Vérifier les query parameters (mais être moins strict pour les emails)
+        for key, value in request.query_params.items():
+            # Ignorer les paramètres de recherche normaux
+            if key in ["search", "skip", "limit"]:
+                # Vérifier seulement les patterns vraiment dangereux
+                if re.search(r"(\b(SELECT|INSERT|UPDATE|DELETE|DROP|CREATE|ALTER|EXEC|EXECUTE)\b|--|#|/\*|\*/|<script)", str(value), re.IGNORECASE):
+                    logger.critical(
+                        f"SECURITY ALERT: SQL/XSS attempt from {request.client.host} "
+                        f"in parameter {key}: {value[:100]}"
+                    )
+                    return JSONResponse(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        content={"detail": "Invalid input detected"}
+                    )
+            else:
+                is_attack, attack_type = self.detect_attack(str(value))
+                if is_attack:
+                    logger.critical(
+                        f"SECURITY ALERT: {attack_type} attempt from {request.client.host} "
+                        f"in parameter {key}: {value[:100]}"
+                    )
+                    return JSONResponse(
+                        status_code=status.HTTP_400_BAD_REQUEST,
+                        content={"detail": "Invalid input detected"}
+                    )
+        
+        # Vérifier le body seulement si c'est du JSON (pas les formulaires form-urlencoded)
         if request.method in ["POST", "PUT", "PATCH"]:
-            content_type = request.headers.get("content-type", "")
-            # Ignorer les formulaires (form-urlencoded) qui sont normaux
+            # Ignorer les formulaires (form-urlencoded et multipart) qui sont normaux
             if "application/json" in content_type:
                 try:
                     body = await request.body()
