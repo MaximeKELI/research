@@ -23,8 +23,22 @@ class UserResponse(UserBase):
 class ProfilCandidatBase(BaseModel):
     nom: str
     prenom: str
+    date_naissance: Optional[date] = None
+    genre: Optional[str] = None
+    telephone: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
+    pays: Optional[str] = None
+    code_postal: Optional[str] = None
     niveau_etude: Optional[str] = None
+    domaine_etude: Optional[str] = None
+    annee_obtention: Optional[int] = None
     competences: Optional[str] = None
+    annees_experience: Optional[int] = None
+    secteur_experience: Optional[str] = None
+    statut_professionnel: Optional[str] = None
+    disponibilite: Optional[str] = None
+    salaire_souhaite: Optional[str] = None
 
 class ProfilCandidatCreate(ProfilCandidatBase):
     pass
@@ -32,8 +46,22 @@ class ProfilCandidatCreate(ProfilCandidatBase):
 class ProfilCandidatUpdate(BaseModel):
     nom: Optional[str] = None
     prenom: Optional[str] = None
+    date_naissance: Optional[date] = None
+    genre: Optional[str] = None
+    telephone: Optional[str] = None
+    adresse: Optional[str] = None
+    ville: Optional[str] = None
+    pays: Optional[str] = None
+    code_postal: Optional[str] = None
     niveau_etude: Optional[str] = None
+    domaine_etude: Optional[str] = None
+    annee_obtention: Optional[int] = None
     competences: Optional[str] = None
+    annees_experience: Optional[int] = None
+    secteur_experience: Optional[str] = None
+    statut_professionnel: Optional[str] = None
+    disponibilite: Optional[str] = None
+    salaire_souhaite: Optional[str] = None
     cv_url: Optional[str] = None
 
 class ProfilCandidatResponse(ProfilCandidatBase):
