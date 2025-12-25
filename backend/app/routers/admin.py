@@ -291,8 +291,36 @@ async def export_pdf_statistiques(
     story.append(title)
     story.append(Spacer(1, 12))
     
-    # Récupérer les statistiques
-    stats = await get_statistiques(current_user, db)
+    # Récupérer les statistiques directement
+    total_users = db.query(func.count(User.id)).scalar()
+    total_candidats = db.query(func.count(ProfilCandidat.id)).scalar()
+    total_entreprises = db.query(func.count(Entreprise.id)).scalar()
+    total_entreprises_validees = db.query(func.count(Entreprise.id)).filter(Entreprise.validee == True).scalar()
+    total_offres = db.query(func.count(Offre.id)).scalar()
+    total_candidatures = db.query(func.count(Candidature.id)).scalar()
+    
+    candidats_par_genre = db.query(
+        ProfilCandidat.genre,
+        func.count(ProfilCandidat.id).label('count')
+    ).group_by(ProfilCandidat.genre).all()
+    genre_stats = {genre or 'Non spécifié': count for genre, count in candidats_par_genre}
+    
+    entreprises_par_secteur = db.query(
+        Entreprise.secteur,
+        func.count(Entreprise.id).label('count')
+    ).group_by(Entreprise.secteur).all()
+    secteur_stats = {secteur or 'Non spécifié': count for secteur, count in entreprises_par_secteur}
+    
+    stats = {
+        "total_users": total_users or 0,
+        "total_candidats": total_candidats or 0,
+        "total_entreprises": total_entreprises or 0,
+        "total_entreprises_validees": total_entreprises_validees or 0,
+        "total_offres": total_offres or 0,
+        "total_candidatures": total_candidatures or 0,
+        "candidats_par_genre": genre_stats,
+        "entreprises_par_secteur": secteur_stats,
+    }
     
     # Tableau des statistiques générales
     data = [
