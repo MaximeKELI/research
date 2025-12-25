@@ -1,5 +1,7 @@
+import 'package:dio/dio.dart';
 import '../core/api_client.dart';
 import '../models/entreprise.dart';
+import 'dart:io';
 
 class EntrepriseService {
   final ApiClient _apiClient = ApiClient();
