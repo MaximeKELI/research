@@ -126,14 +126,26 @@ async def update_profil(
         )
     
     # Sanitizer et mettre à jour les champs
-    if profil_data.nom is not None:
-        profil.nom = sanitize_string(profil_data.nom, max_length=100)
-    if profil_data.prenom is not None:
-        profil.prenom = sanitize_string(profil_data.prenom, max_length=100)
-    if profil_data.niveau_etude is not None:
-        profil.niveau_etude = sanitize_string(profil_data.niveau_etude, max_length=50)
-    if profil_data.competences is not None:
-        profil.competences = sanitize_string(profil_data.competences, max_length=1000)
+    update_data = profil_data.model_dump(exclude_unset=True)
+    for field, value in update_data.items():
+        if isinstance(value, str):
+            # Longueurs max selon le type de champ
+            if field in ['nom', 'prenom', 'ville', 'pays', 'domaine_etude', 'secteur_experience']:
+                max_len = 100
+            elif field in ['telephone', 'code_postal', 'statut_professionnel', 'disponibilite', 'salaire_souhaite', 'genre']:
+                max_len = 50
+            elif field in ['adresse']:
+                max_len = 255
+            elif field in ['competences']:
+                max_len = 1000
+            elif field in ['niveau_etude']:
+                max_len = 50
+            else:
+                max_len = 255
+            setattr(profil, field, sanitize_string(value, max_length=max_len))
+        else:
+            # Pour les dates et entiers, pas de sanitization
+            setattr(profil, field, value)
     
     db.commit()
     db.refresh(profil)
