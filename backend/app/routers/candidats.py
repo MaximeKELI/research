@@ -47,13 +47,40 @@ async def create_profil(
     niveau_etude = sanitize_string(profil_data.niveau_etude, max_length=50) if profil_data.niveau_etude else None
     competences = sanitize_string(profil_data.competences, max_length=1000) if profil_data.competences else None
     
+    # Sanitizer les nouveaux champs
+    telephone = sanitize_string(profil_data.telephone, max_length=20) if profil_data.telephone else None
+    adresse = sanitize_string(profil_data.adresse, max_length=255) if profil_data.adresse else None
+    ville = sanitize_string(profil_data.ville, max_length=100) if profil_data.ville else None
+    pays = sanitize_string(profil_data.pays, max_length=100) if profil_data.pays else None
+    code_postal = sanitize_string(profil_data.code_postal, max_length=20) if profil_data.code_postal else None
+    domaine_etude = sanitize_string(profil_data.domaine_etude, max_length=100) if profil_data.domaine_etude else None
+    secteur_experience = sanitize_string(profil_data.secteur_experience, max_length=100) if profil_data.secteur_experience else None
+    statut_professionnel = sanitize_string(profil_data.statut_professionnel, max_length=50) if profil_data.statut_professionnel else None
+    disponibilite = sanitize_string(profil_data.disponibilite, max_length=50) if profil_data.disponibilite else None
+    salaire_souhaite = sanitize_string(profil_data.salaire_souhaite, max_length=50) if profil_data.salaire_souhaite else None
+    genre = sanitize_string(profil_data.genre, max_length=10) if profil_data.genre else None
+    
     # Utiliser les données sanitizées
     db_profil = ProfilCandidat(
         user_id=current_user.id,
         nom=nom,
         prenom=prenom,
+        date_naissance=profil_data.date_naissance,
+        genre=genre,
+        telephone=telephone,
+        adresse=adresse,
+        ville=ville,
+        pays=pays,
+        code_postal=code_postal,
         niveau_etude=niveau_etude,
-        competences=competences
+        domaine_etude=domaine_etude,
+        annee_obtention=profil_data.annee_obtention,
+        competences=competences,
+        annees_experience=profil_data.annees_experience,
+        secteur_experience=secteur_experience,
+        statut_professionnel=statut_professionnel,
+        disponibilite=disponibilite,
+        salaire_souhaite=salaire_souhaite
     )
     db.add(db_profil)
     db.commit()
