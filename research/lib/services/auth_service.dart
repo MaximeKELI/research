@@ -133,16 +133,26 @@ class AuthService {
         // Après l'inscription, se connecter automatiquement pour obtenir le token
         try {
           final loginResult = await login(email, password);
-          if (loginResult['success'] == true) {
+          if (loginResult['success'] == true && loginResult['token'] != null) {
+            if (kDebugMode) {
+              print('✅ Connexion automatique réussie après inscription');
+            }
             return {
               'success': true,
               'user': user,
               'token': loginResult['token'],
             };
+          } else {
+            if (kDebugMode) {
+              print('⚠️ Connexion automatique échouée: ${loginResult['error']}');
+            }
           }
         } catch (e) {
           // Si la connexion automatique échoue, on retourne quand même le succès
           // L'utilisateur devra se connecter manuellement
+          if (kDebugMode) {
+            print('⚠️ Erreur lors de la connexion automatique: $e');
+          }
         }
         
         return {
