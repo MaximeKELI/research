@@ -8,7 +8,7 @@ class CandidatureService {
   Future<Candidature?> postuler(int offreId) async {
     try {
       final response = await _apiClient.dio.post(
-        '/candidatures',
+        '/candidatures/',
         data: {'offre_id': offreId},
       );
       return Candidature.fromJson(response.data);

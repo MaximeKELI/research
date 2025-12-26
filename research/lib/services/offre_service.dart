@@ -21,7 +21,7 @@ class OffreService {
       if (search != null) queryParams['search'] = search;
 
       final response = await _apiClient.dio.get(
-        '/offres',
+        '/offres/',
         queryParameters: queryParams,
       );
       
@@ -60,7 +60,7 @@ class OffreService {
         'date_limite': dateLimite?.toIso8601String().split('T')[0],
       };
 
-      final response = await _apiClient.dio.post('/offres', data: data);
+      final response = await _apiClient.dio.post('/offres/', data: data);
       return Offre.fromJson(response.data);
     } catch (e) {
       return null;
