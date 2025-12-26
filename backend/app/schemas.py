@@ -128,7 +128,16 @@ class OffreBase(BaseModel):
     description: str
     type: TypeOffre
     lieu: Optional[str] = None
-    salaire: Optional[str] = None
+    ville: Optional[str] = None
+    pays: Optional[str] = None
+    type_contrat: Optional[str] = None
+    salaire: Optional[str] = None  # Gardé pour compatibilité
+    salaire_min: Optional[int] = None
+    salaire_max: Optional[int] = None
+    experience_requise: Optional[str] = None
+    niveau_etude_requis: Optional[str] = None
+    competences_requises: Optional[str] = None
+    avantages: Optional[str] = None
     date_limite: Optional[date] = None
 
 class OffreCreate(OffreBase):
@@ -139,14 +148,27 @@ class OffreUpdate(BaseModel):
     description: Optional[str] = None
     type: Optional[TypeOffre] = None
     lieu: Optional[str] = None
-    salaire: Optional[str] = None
+    ville: Optional[str] = None
+    pays: Optional[str] = None
+    type_contrat: Optional[str] = None
+    salaire: Optional[str] = None  # Gardé pour compatibilité
+    salaire_min: Optional[int] = None
+    salaire_max: Optional[int] = None
+    experience_requise: Optional[str] = None
+    niveau_etude_requis: Optional[str] = None
+    competences_requises: Optional[str] = None
+    avantages: Optional[str] = None
     date_limite: Optional[date] = None
     statut: Optional[StatutOffre] = None
+    nombre_vues: Optional[int] = None
+    nombre_candidatures: Optional[int] = None
 
 class OffreResponse(OffreBase):
     id: int
     entreprise_id: int
     statut: StatutOffre
+    nombre_vues: int
+    nombre_candidatures: int
     created_at: datetime
     entreprise: Optional[EntrepriseResponse] = None
     
