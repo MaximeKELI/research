@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'config.dart';
 
@@ -23,14 +24,26 @@ class ApiClient {
       onRequest: (options, handler) async {
         final prefs = await SharedPreferences.getInstance();
         final token = prefs.getString('access_token');
-        if (token != null) {
+        if (token != null && token.isNotEmpty) {
           options.headers['Authorization'] = 'Bearer $token';
+          // Debug: print token (première partie seulement pour sécurité)
+          if (kDebugMode) {
+            print('🔑 Token ajouté aux headers: ${token.substring(0, 20)}...');
+          }
+        } else {
+          if (kDebugMode) {
+            print('⚠️ Aucun token trouvé dans SharedPreferences');
+          }
         }
         return handler.next(options);
       },
       onError: (error, handler) {
         if (error.response?.statusCode == 401) {
           // Token expiré ou invalide
+          if (kDebugMode) {
+            print('❌ Erreur 401: Token invalide ou expiré');
+            print('   Response: ${error.response?.data}');
+          }
           _clearToken();
         }
         return handler.next(error);

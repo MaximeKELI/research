@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'dart:io';
 import '../core/api_client.dart';
@@ -35,7 +36,21 @@ class AuthService {
           };
         }
         
+        // Sauvegarder le token
         await _apiClient.setToken(token);
+        
+        // Vérifier que le token est bien sauvegardé
+        final prefs = await SharedPreferences.getInstance();
+        final savedToken = prefs.getString('access_token');
+        if (savedToken == null || savedToken != token) {
+          if (kDebugMode) {
+            print('⚠️ Erreur: Token non sauvegardé correctement');
+          }
+        } else {
+          if (kDebugMode) {
+            print('✅ Token sauvegardé avec succès');
+          }
+        }
         
         // Récupérer les infos utilisateur
         try {
