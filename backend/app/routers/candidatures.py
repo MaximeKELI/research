@@ -7,7 +7,7 @@ from app.schemas import CandidatureCreate, CandidatureUpdate, CandidatureRespons
 
 router = APIRouter()
 
-@router.post("/", response_model=CandidatureResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=CandidatureResponse, status_code=status.HTTP_201_CREATED)
 async def postuler(
     candidature_data: CandidatureCreate,
     current_user: User = Depends(auth.get_current_user),

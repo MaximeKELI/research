@@ -33,7 +33,7 @@ class TestCandidatures:
         db.commit()
 
         response = client.post(
-            "/api/candidatures/",
+            "/api/candidatures",
             headers={"Authorization": f"Bearer {auth_token_candidat}"},
             json={"offre_id": offre.id}
         )
@@ -68,14 +68,14 @@ class TestCandidatures:
 
         # Première postulation
         client.post(
-            "/api/candidatures/",
+            "/api/candidatures",
             headers={"Authorization": f"Bearer {auth_token_candidat}"},
             json={"offre_id": offre.id}
         )
 
         # Deuxième postulation (doit échouer)
         response = client.post(
-            "/api/candidatures/",
+            "/api/candidatures",
             headers={"Authorization": f"Bearer {auth_token_candidat}"},
             json={"offre_id": offre.id}
         )

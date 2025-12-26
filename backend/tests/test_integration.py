@@ -99,7 +99,7 @@ class TestIntegration:
 
         # 5. Créer une offre
         response = client.post(
-            "/api/offres/",
+            "/api/offres",
             headers={"Authorization": f"Bearer {token}"},
             json={
                 "titre": "Développeur Full Stack",
@@ -185,7 +185,7 @@ class TestIntegration:
 
         # 5. Candidat postule
         response = client.post(
-            "/api/candidatures/",
+            "/api/candidatures",
             headers={"Authorization": f"Bearer {token}"},
             json={"offre_id": offre.id}
         )

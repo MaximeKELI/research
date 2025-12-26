@@ -35,7 +35,7 @@ class TestSQLInjection:
         ]
         
         for malicious_input in malicious_inputs:
-            response = client.get(f"/api/offres/?search={malicious_input}")
+            response = client.get(f"/api/offres?search={malicious_input}")
             assert response.status_code in [status.HTTP_400_BAD_REQUEST, status.HTTP_200_OK]
             # Ne doit pas retourner d'erreur SQL
     
@@ -71,7 +71,7 @@ class TestXSS:
         ]
         
         for payload in xss_payloads:
-            response = client.get(f"/api/offres/?search={payload}")
+            response = client.get(f"/api/offres?search={payload}")
             # En mode test, peut retourner 200 (middleware désactivé)
             # En production, retournerait 400
             assert response.status_code in [status.HTTP_200_OK, status.HTTP_400_BAD_REQUEST]

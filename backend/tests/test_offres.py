@@ -20,7 +20,7 @@ class TestOffres:
         db.commit()
 
         response = client.post(
-            "/api/offres/",
+            "/api/offres",
             headers={"Authorization": f"Bearer {auth_token_entreprise}"},
             json={
                 "titre": "Développeur Python",
@@ -49,7 +49,7 @@ class TestOffres:
         db.commit()
 
         response = client.post(
-            "/api/offres/",
+            "/api/offres",
             headers={"Authorization": f"Bearer {auth_token_entreprise}"},
             json={
                 "titre": "Développeur Python",
@@ -79,7 +79,7 @@ class TestOffres:
         db.add(offre)
         db.commit()
 
-        response = client.get("/api/offres/")
+        response = client.get("/api/offres")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert isinstance(data, list)
@@ -106,19 +106,19 @@ class TestOffres:
         db.commit()
 
         # Test avec filtre type
-        response = client.get("/api/offres/?type=stage")
+        response = client.get("/api/offres?type=stage")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert all(o["type"] == "stage" for o in data)
 
         # Test avec filtre lieu
-        response = client.get("/api/offres/?lieu=Lyon")
+        response = client.get("/api/offres?lieu=Lyon")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) > 0
 
         # Test avec recherche
-        response = client.get("/api/offres/?search=Python")
+        response = client.get("/api/offres?search=Python")
         assert response.status_code == status.HTTP_200_OK
         data = response.json()
         assert len(data) > 0

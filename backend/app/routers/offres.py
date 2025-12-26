@@ -10,7 +10,7 @@ from app.schemas import OffreCreate, OffreUpdate, OffreResponse
 
 router = APIRouter()
 
-@router.post("/", response_model=OffreResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=OffreResponse, status_code=status.HTTP_201_CREATED)
 async def create_offre(
     offre_data: OffreCreate,
     current_user: User = Depends(auth.get_current_user),
@@ -44,7 +44,7 @@ async def create_offre(
     db.refresh(db_offre)
     return db_offre
 
-@router.get("/", response_model=list[OffreResponse])
+@router.get("", response_model=list[OffreResponse])
 async def get_offres(
     skip: int = 0,
     limit: int = 20,
