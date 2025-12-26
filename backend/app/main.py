@@ -29,7 +29,8 @@ Base.metadata.create_all(bind=engine)
 app = FastAPI(
     title="JobApp API",
     description="API pour la plateforme de stages et emplois",
-    version="1.0.0"
+    version="1.0.0",
+    redirect_slashes=True  # Redirige automatiquement les URLs avec slash final
 )
 
 # Middlewares de sécurité (ordre important!)
