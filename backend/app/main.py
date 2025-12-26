@@ -30,7 +30,7 @@ app = FastAPI(
     title="JobApp API",
     description="API pour la plateforme de stages et emplois",
     version="1.0.0",
-    redirect_slashes=True  # Redirige automatiquement les URLs avec slash final
+    redirect_slashes=False  # Pas de redirection automatique (URLs Flutter corrigées)
 )
 
 # Middlewares de sécurité (ordre important!)
